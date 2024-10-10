@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fruit Matching Game</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/index.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <!-- Link to Font Awesome for icons -->
+  </head>
+  <body>
+    <img id="logo" src="{% static 'images/' %}logo_white.png" alt="Logo" />
+    <!-- Background Music -->
+    <audio id="backgroundMusic" loop autoplay>
+      <source
+        src="{% static 'music/background_music.mp3' %}"
+        type="audio/mp3"
+      />
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="game-intro">
+      <div class="game-header">
+        <h2>Welcome to the Fruit Matching Game!</h2>
+        <!-- Volume Control -->
+        <div class="volume-control">
+          <label for="volumeSlider">Music Volume:</label>
+          <input type="range" id="volumeSlider" min="0" max="100" value="50" />
+        </div>
+      </div>
+
+      <p>
+        Get ready to dive into a colorful world of fruits! In this fun and
+        challenging game, you'll need to match pairs of delicious fruits as
+        quickly as you can. Each level will test your memory and speed, so keep
+        your eyes sharp and your fingers quick. The more pairs you match in a
+        shorter time, the higher your score! Let’s see how many fruits you can
+        match before the time runs out. Have fun and good luck!
+      </p>
+      <h2>How to Play</h2>
+      <ol>
+        <li>Select a difficulty level: Easy, Medium, or Hard.</li>
+        <li>
+          In each level, you will see a grid of face-down cards. Each card has a
+          hidden fruit image.
+        </li>
+        <li>Click on a card to flip it over and reveal the fruit.</li>
+        <li>
+          Try to remember the fruit on the flipped card and click on another
+          card to reveal its fruit.
+        </li>
+        <li>
+          If the fruits match, they will stay flipped over. If they don't match,
+          they will flip back after a short delay.
+        </li>
+        <li>Keep flipping cards until you match all the pairs!</li>
+        <li>Your score will be based on how quickly you find all the pairs.</li>
+        <li>Good luck, and enjoy the game!</li>
+      </ol>
+      <div class="game-menu">
+        <a id="easy" href="{% url 'start_game' 'easy' %}">Play Easy Mode</a>
+        <a id="medium" href="{% url 'start_game' 'medium' %}"
+          >Play Medium Mode</a
+        >
+        <a id="hard" href="{% url 'start_game' 'hard' %}">Play Hard Mode</a>
+      </div>
+    </div>
+
+    <div class="leaderboard">
+      <div id="leaderboard-header">
+        <h2>Leaderboard</h2>
+        <a
+          href="{% url 'clear_leaderboard' %}"
+          class="clearRank"
+          onclick="return confirm(a'Are you sure you want to clear the leaderboard?')"
+        >
+          <i class="fas fa-redo-alt"></i> Clear Leaderboard
+        </a>
+      </div>
+
+      <table>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Time (seconds)</th>
+          <th>Level</th>
+        </tr>
+        {% for score in scores %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ score.name }}</td>
+          <td>{{ score.time }}</td>
+          <td>{{ score.level }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var audioElement = document.getElementById("backgroundMusic");
+        var volumeSlider = document.getElementById("volumeSlider");
+
+        // Set initial volume
+        audioElement.volume = 0.5;
+
+        // Update the volume when the slider changes
+        volumeSlider.addEventListener("input", function () {
+          audioElement.volume = volumeSlider.value / 100;
+        });
+      });
+    </script>
+  </body>
+</html>

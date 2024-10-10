@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fruit Matching Game</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/index.css' %}" />
+  </head>
+  <body>
+    <img id="logo" src="{% static 'images/' %}logo_white.png" alt="Logo" />
+    <div id="game-box">
+      <h1>Fruit Matching Game - Level: {{ level }}</h1>
+      <div id="backandtime">
+        <a id="backToIndex" href="{% url 'index' %}" class="button">Back</a>
+        <div id="timer">Time: 0 seconds</div>
+        <!-- Add your sound file here -->
+        <audio id="backgroundMusic" loop autoplay>
+          <source src="{% static 'music/game_bg.mp3' %}" type="audio/mp3" />
+          Your browser does not support the audio element.
+        </audio>
+
+        <audio
+          id="matchSound"
+          src="{% static 'music/correct.mp3' %}"
+          type="audio/mp3"
+        ></audio>
+
+        <!-- Volume Control -->
+        <div class="volume-control">
+          <label for="volumeSlider">Music Volume:</label>
+          <input type="range" id="volumeSlider" min="0" max="100" value="50" />
+        </div>
+      </div>
+
+      <div id="game-board" class="{{ level|lower }}">
+        {% for card in deck %}
+        <div class="card" data-index="{{ forloop.counter0 }}">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-back-content">{{ card.name }}</div>
+            </div>
+            <div class="card-back">
+              <img
+                src="{% static 'images/' %}{{ card.image }}"
+                alt="{{ card.name }}"
+              />{{ card.name }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- Modal structure to be placed inside your game page -->
+    <div id="congratulationsModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h1>Congratulations! You've matched all the cards!</h1>
+        <p>Your time: <span id="gameTime">{{ time }}</span> seconds</p>
+
+        <form action="{% url 'submit_score' %}" method="GET" id="scoreForm">
+          <label for="playerName">Enter your name:</label>
+          <input type="text" id="playerName" name="playerName" required />
+          <input type="hidden" name="time" id="timeInput" value="" />
+          <button type="submit">Submit Score</button>
+        </form>
+
+        <a href="{% url 'index' %}">Play Again</a>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let matchedCards = new Set(); // To store matched card indices
+        let flippedCards = []; // To store currently flipped cards
+        let timer; // Variable to store the timer interval
+        let seconds = 0; // Variable to track elapsed time
+        let timerStarted = false; // Flag to check if the timer has started
+
+        var audioElement = document.getElementById("backgroundMusic");
+        var volumeSlider = document.getElementById("volumeSlider");
+        var matchSound = document.getElementById("matchSound"); // Reference to the match sound
+
+        // Set initial volume
+        audioElement.volume = 0.5;
+
+        // Update the volume when the slider changes
+        volumeSlider.addEventListener("input", function () {
+          audioElement.volume = volumeSlider.value / 100;
+        });
+
+        function enforceMinWidth() {
+          if (window.innerWidth < 1010) {
+            window.resizeTo(1010, window.innerHeight); // Set the window width to 1010px
+          }
+        }
+
+        // Attach the function to the resize event
+        window.addEventListener("resize", enforceMinWidth);
+
+        // Run it initially to enforce when the page loads
+        enforceMinWidth();
+
+        function updateTimer() {
+          seconds++;
+          document.getElementById(
+            "timer"
+          ).textContent = `Time: ${seconds} seconds`;
+          console.log(seconds, " seconds"); // Log the timer value immediately
+        }
+
+        // Start the timer when the first card is flipped
+        document.querySelectorAll(".card").forEach((card) => {
+          card.addEventListener("click", function () {
+            console.log("Card clicked:", card.getAttribute("data-index")); // Log card click
+            // If the card is already matched or flipped, don't flip again
+            if (
+              matchedCards.has(card.getAttribute("data-index")) ||
+              card.classList.contains("flipped")
+            ) {
+              return;
+            }
+
+            // Start the timer on the first card flip
+            if (!timerStarted) {
+              timer = setInterval(updateTimer, 1000); // Update timer every second
+              timerStarted = true; // Set the flag to true
+            }
+
+            // Add flipped class to card for animation
+            card.classList.add("flipped");
+            flippedCards.push(card);
+
+            // Check if two cards are flipped
+            if (flippedCards.length === 2) {
+              const firstCardName = flippedCards[0]
+                .querySelector(".card-back-content")
+                .textContent.trim(); // Trim whitespace
+              const secondCardName = flippedCards[1]
+                .querySelector(".card-back-content")
+                .textContent.trim(); // Trim whitespace
+
+              console.log("First card:", firstCardName); // Debug log
+              console.log("Second card:", secondCardName); // Debug log
+
+              // Check if cards match
+              if (firstCardName === secondCardName) {
+                // Cards match, keep them flipped and disable clicks
+                flippedCards.forEach((flippedCard) => {
+                  flippedCard.classList.add("matched");
+                  matchedCards.add(flippedCard.getAttribute("data-index"));
+                  flippedCard.removeEventListener("click", arguments.callee); // Prevent further clicks on matched cards
+                });
+
+                // Play the match sound effect
+                matchSound.play();
+
+                // Check if all cards are matched
+                if (
+                  matchedCards.size ===
+                  document.querySelectorAll(".card").length
+                ) {
+                  console.log("All cards matched. Game ends.");
+
+                  // Clear the timer when all cards are matched
+                  clearInterval(timer);
+                  // Send the time to the server with the URL
+                  const url = "{% url 'congratulations' %}?time=" + seconds; // Redirect to the congratulations page with the time
+                  setTimeout(() => {
+                    window.location.href = url; // Redirect to the congratulations page
+                  }, 1000);
+                }
+              } else {
+                flippedCards.forEach((flippedCard) => {
+                  setTimeout(() => {
+                    flippedCard.classList.remove("flipped");
+                  }, 1000);
+                });
+              }
+              // Clear the flipped cards array after checking the match
+              flippedCards = [];
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

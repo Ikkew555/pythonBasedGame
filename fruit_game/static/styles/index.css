@@ -1,0 +1,444 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap");
+/* Reset box-sizing and remove default padding/margin */
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: "Caveat", cursive;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Full viewport height */
+  background-color: #f4f4f4; /* Fallback color */
+  background-image: url("/static/images/wallpaper.jpg");
+  background-repeat: repeat; /* Prevent the image from repeating */
+  background-size: cover; /* Cover the entire viewport */
+  padding: 40px;
+}
+
+#game-box {
+  background-color: #fff;
+  /* width: 100%; */
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  padding: 24px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Adds shadow for depth */
+}
+
+/* Set up the grid for the game board */
+#game-board {
+  display: grid; /* Use grid layout */
+  grid-template-columns: repeat(8, 1fr); /* Default: Four equal columns */
+  gap: 16px; /* Gap between cards */
+  margin: 20px;
+  padding: 20px; /* Adds padding around the game board */
+}
+
+/* Styling for cards */
+.card {
+  /* max-width: 150px; */
+  height: 260px;
+  width: 190px;
+
+  /* background-color: white; */
+  color: #333;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px; /* Enables 3D space for the card to flip */
+  cursor: pointer; /* Custom cursor for interactivity */
+  position: relative;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+  overflow: hidden; /* Hide overflow to prevent image spilling out */
+}
+
+/* Inner container for the flip animation */
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s; /* Smooth transition for the flip */
+  transform-style: preserve-3d; /* Enables 3D transformation */
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg); /* Flip the card */
+}
+
+/* Card front and back */
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the back of the card when flipped */
+  border-radius: 8px; /* Rounded corners */
+}
+
+/* Front of the card */
+.card-front {
+  z-index: 2; /* Keep the front on top */
+  transform: rotateY(0deg); /* Default position */
+}
+
+/* Back of the card */
+.card-back {
+  transform: rotateY(180deg); /* Initially hidden */
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  flex-direction: column;
+}
+
+/* Scale effect for the card when hovered */
+.card:hover {
+  transform: scale(1.01); /* Scale the card up */
+  z-index: 1; /* Bring the hovered card to the front */
+}
+
+/* Game won message */
+#congratulations {
+  font-size: 28px;
+  color: green;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Styling the restart button */
+#restartBtn {
+  padding: 10px 20px;
+  background-color: #28a745; /* Green background */
+  color: white; /* White text */
+  text-decoration: none;
+  border-radius: 5px; /* Rounded corners */
+  display: inline-block;
+  font-size: 18px;
+  margin-top: 20px;
+  transition: background-color 0.3s ease; /* Transition for hover effect */
+}
+
+#restartBtn:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+@media (max-width: 1730px) {
+  #game-board {
+    grid-template-columns: repeat(
+      4,
+      1fr
+    ); /* 2 cards per row on small screens */
+  }
+
+  .card {
+    height: 260px;
+    width: 190px;
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 900px) {
+  #game-board {
+    grid-template-columns: repeat(
+      4,
+      150px
+    ); /* 2 cards per row on small screens */
+  }
+
+  .card {
+    height: 200px;
+    width: 150px;
+  }
+}
+
+@media (max-width: 760px) {
+  #game-board {
+    grid-template-columns: repeat(
+      2,
+      150px
+    ); /* 2 cards per row on small screens */
+  }
+
+  .card {
+    height: 200px;
+    width: 150px;
+  }
+
+  h1 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+}
+
+/* Style for the header */
+h1 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px; /* Space below the title */
+}
+
+/* Play buttons styling */
+a {
+  padding: 12px 24px; /* Padding for buttons */
+  margin: 10px; /* Margin for spacing between buttons */
+  color: white; /* White text */
+  text-decoration: none; /* Remove underline */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 18px; /* Button text size */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Background colors based on level */
+a#easy {
+  background-color: #28a745; /* Green for Easy */
+}
+
+a#medium {
+  background-color: #ffc107; /* Yellow for Medium */
+}
+
+a#hard {
+  background-color: #dc3545; /* Red for Hard */
+}
+
+/* Change button color on hover */
+a:hover {
+  opacity: 0.9; /* Slightly darken on hover */
+}
+
+/* Back to index button */
+a#backToIndex {
+  color: #dc3545;
+  border: solid 1px #dc3545;
+}
+
+a#backToIndex:hover {
+  color: white;
+  cursor: pointer;
+  border: solid 1px #dc3545;
+  background-color: #dc3545;
+}
+
+table {
+  width: 100%; /* Table width */
+  margin: 20px 0; /* Margin for spacing */
+  border-collapse: collapse; /* Remove spacing between borders */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  background-color: white; /* White background for the table */
+  border: 1px solid #ddd; /* Border for the table */
+  height: 60%; /* Set the height of the table */
+  overflow-y: auto; /* Allow vertical scrolling */
+  display: block; /* Make the table block-level for overflow to work */
+  border-radius: 8px;
+}
+
+tbody {
+  display: block; /* Display the tbody as a block to allow scrolling */
+  overflow-y: auto; /* Allow vertical scrolling */
+  padding: 16px;
+}
+
+thead,
+tbody tr {
+  display: table; /* Display table rows correctly */
+  width: 100%; /* Make sure width is consistent */
+  table-layout: fixed; /* Ensure table cells are sized evenly */
+}
+
+/* Table header styling */
+th,
+td {
+  padding: 12px; /* Cell padding */
+  text-align: left; /* Left-align text */
+  border-bottom: 1px solid #ddd; /* Bottom border for rows */
+}
+
+/* Add hover effect for rows */
+tr:hover {
+  background-color: #f1f1f1; /* Light gray background on hover */
+}
+
+.card-back-content {
+  background-image: url("/static/images/card.png");
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  background-size: contain; /* Ensure the image fits the container */
+  height: 260px;
+  color: transparent; /* Make text color transparent */
+  font-size: 0; /* Optionally set font size to 0 to remove any space taken by text */
+}
+
+#backandtime {
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-back img {
+  max-width: 100%; /* Prevent the image from overflowing the container */
+  max-height: 100%; /* Prevent the image from overflowing the container */
+  object-fit: contain; /* Ensure the image scales correctly within its container */
+  display: block; /* Prevent any inline spacing below the image */
+  overflow: hidden;
+}
+
+/* Header for leaderboard and clear button */
+#leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+}
+
+a.clearRank {
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin: 0;
+}
+
+a.clearRank i {
+  margin-right: 8px; /* Space between icon and text */
+}
+
+a.clearRank:hover {
+  background-color: darkred;
+}
+
+.game-menu {
+  margin: 32px 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* h2 {
+  padding-left: 16px;
+} */
+
+.leaderboard {
+  width: 80%;
+  padding: 16px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.game-intro {
+  background-color: #fff; /* White background for contrast */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px; /* Padding for content spacing */
+  margin: 20px 0; /* Margin for spacing between sections */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  width: 80%;
+}
+
+h2 {
+  color: #333; /* Dark text for headings */
+  margin: 16px 0;
+}
+
+li {
+  color: #555; /* Lighter gray for body text */
+  font-size: 20px; /* Standard font size */
+  margin-left: 16px;
+}
+
+p {
+  color: #555; /* Lighter gray for body text */
+  font-size: 16px; /* Standard font size */
+}
+
+img#logo {
+  width: 200px;
+}
+
+p {
+  font-size: 20px;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.volume-control label {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+#volumeSlider {
+  width: 200px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%; /* Make sure it spans full width */
+  padding: 16px 0; /* Add padding for breathing room */
+  box-sizing: border-box; /* Ensure padding doesn’t affect the width */
+}
+
+.game-header h2 {
+  color: black;
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Style for the modal */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 9999; /* On top of other elements */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+}

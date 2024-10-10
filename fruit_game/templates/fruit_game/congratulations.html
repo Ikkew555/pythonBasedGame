@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Congratulations!</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/congratulations.css' %}" />
+    <style>
+      /* Fireworks canvas */
+      #fireworks {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Prevent interaction */
+        z-index: 999; /* Ensure it's on top */
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="fireworks"></canvas>
+    <audio id="backgroundMusic" loop autoplay>
+      <source
+        src="{% static 'music/background_music.mp3' %}"
+        type="audio/mp3"
+      />
+      Your browser does not support the audio element.
+    </audio>
+    <div id="game-box">
+      <h1>🎉 Congratulations! 🎉</h1>
+      <p>You finished Level {{ level }}! Your time: {{ time }} seconds</p>
+
+      <p>
+        Great job! You did amazing! Keep it up, and keep playing to become a
+        pro!
+      </p>
+      <p>Remember, every game is a new adventure! 🌟</p>
+      <div class="volume-control">
+        <label for="volumeSlider">Music Volume:</label>
+        <input type="range" id="volumeSlider" min="0" max="100" value="50" />
+      </div>
+      <form action="{% url 'submit_score' %}" method="GET" id="scoreForm">
+        <div class="input-playerName">
+          <label for="playerName">Enter your name:</label>
+          <input type="text" id="playerName" name="playerName" required />
+          <input type="hidden" name="time" value="{{ time }}" />
+          <input type="hidden" name="level" value="{{ level }}" />
+        </div>
+
+        <button type="submit">Submit Score</button>
+        <button type="button" id="backToMenuBtn">Back to Menu</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("backToMenuBtn")
+        .addEventListener("click", function () {
+          window.location.href = "{% url 'index' %}"; // Redirect to the index page
+        });
+
+      // Fireworks effect
+      const canvas = document.getElementById("fireworks");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      function Firework(x, y) {
+        this.x = x;
+        this.y = y;
+        this.particles = [];
+        this.exploded = false;
+
+        // Create particles
+        for (let i = 0; i < 100; i++) {
+          this.particles.push(new Particle(x, y));
+        }
+      }
+
+      function Particle(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 1;
+        this.speedX = (Math.random() - 0.5) * 6;
+        this.speedY = (Math.random() - 0.5) * 6;
+        this.gravity = 0.2;
+        this.alpha = 1; // Fully visible
+
+        this.update = function () {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.speedY += this.gravity;
+          this.alpha -= 0.02; // Fade out
+        };
+
+        this.draw = function () {
+          ctx.globalAlpha = this.alpha; // Apply alpha for fading
+          ctx.fillStyle = "hsl(" + Math.random() * 360 + ", 100%, 50%)"; // Random color
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        };
+      }
+
+      let fireworks = [];
+
+      function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = (Math.random() * canvas.height) / 2;
+        fireworks.push(new Firework(x, y));
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        fireworks.forEach((firework) => {
+          firework.particles.forEach((particle) => {
+            particle.update();
+            particle.draw();
+          });
+        });
+
+        // Remove fireworks that have faded out
+        fireworks = fireworks.filter((firework) => {
+          return firework.particles.some((particle) => particle.alpha > 0);
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      // Show fireworks on page load for 5 seconds
+      window.onload = () => {
+        const fireworkInterval = setInterval(createFirework, 500); // Create a firework every 500ms
+
+        // Stop fireworks after 5 seconds
+        setTimeout(() => {
+          clearInterval(fireworkInterval); // Stop creating new fireworks
+        }, 15000);
+
+        animate(); // Start animation
+      };
+
+      // Optional: Automatically show the form after a delay
+      setTimeout(() => {
+        document.getElementById("scoreForm").style.display = "block";
+      }, 5000); // Adjust the delay as needed
+      var audioElement = document.getElementById("backgroundMusic");
+      var volumeSlider = document.getElementById("volumeSlider");
+
+      // Set initial volume
+      audioElement.volume = 0.5;
+
+      // Update the volume when the slider changes
+      volumeSlider.addEventListener("input", function () {
+        audioElement.volume = volumeSlider.value / 100;
+      });
+    </script>
+  </body>
+</html>
